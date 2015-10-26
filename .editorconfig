@@ -1,0 +1,22 @@
+# editorconfig.org
+# Get your text editor plugin at:
+# http://editorconfig.org/#download
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+
+# On save, removes trailing whitespace
+trim_trailing_whitespace = true
+
+# On save, adds the final newline character.
+# It's required for some unix command to work.
+# In a git diff, no final newline generates the "No newline at end of file"
+# message. # This is not a bug, just a message by git.
+insert_final_newline = true
+
+[Makefile]
+indent_style = tab
