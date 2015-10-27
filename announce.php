@@ -31,14 +31,14 @@ define('__VERSION', '2.0');
 defined('__INTERVAL') || define('__INTERVAL', 1800);
 
 // Time out if peer is this late to re-announce (Seconds)
-defined('__TIMEOUT') || define('__TIMEOUT', 120);
+defined('__TIMEOUT') || define('__TIMEOUT', 120);
 
 // Minimum announce interval (Seconds)
 // Most clients obey this, but not all
-defined('__INTERVAL_MIN') || define('__INTERVAL_MIN', 60);
+defined('__INTERVAL_MIN') || define('__INTERVAL_MIN', 60);
 
 // By default, never encode more than this number of peers in a single request
-defined('__MAX_PPR') || define('__MAX_PPR', 20);
+defined('__MAX_PPR') || define('__MAX_PPR', 20);
 
  /***********************
  ** Configuration end **
