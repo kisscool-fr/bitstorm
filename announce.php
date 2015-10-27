@@ -24,18 +24,21 @@
 // Configuration details
 require 'configuration.php';
 
+// What version are we at ?
+define('__VERSION', '2.0');
+
 // Peer announce interval (Seconds)
-define('__INTERVAL', 1800);
+defined('__INTERVAL') || define('__INTERVAL', 1800);
 
 // Time out if peer is this late to re-announce (Seconds)
-define('__TIMEOUT', 120);
+defined('__TIMEOUT') || define('__TIMEOUT', 120);
 
 // Minimum announce interval (Seconds)
 // Most clients obey this, but not all
-define('__INTERVAL_MIN', 60);
+defined('__INTERVAL_MIN') || define('__INTERVAL_MIN', 60);
 
 // By default, never encode more than this number of peers in a single request
-define('__MAX_PPR', 20);
+defined('__MAX_PPR') || define('__MAX_PPR', 20);
 
  /***********************
  ** Configuration end **
@@ -43,6 +46,7 @@ define('__MAX_PPR', 20);
 
 // Use the correct content-type
 header("Content-type: Text/Plain");
+header('X-Tracker-Version: Bitstorm '.__VERSION.' by stormhub.org with PDO github.com/kisscool-fr');
 
 // Connect to the MySQL server
 try
@@ -70,10 +74,6 @@ valdata('info_hash', true);
 if (!isset($_GET['key'])) {
     $_GET['key'] = '';
 }
-
-$downloaded = isset($_GET['uploaded']) ? intval($_GET['uploaded']) : 0;
-$uploaded = isset($_GET['uploaded']) ? intval($_GET['uploaded']) : 0;
-$left = isset($_GET['left']) ? intval($_GET['left']) : 0;
 
 // Validate key as well
 valdata('key');
@@ -124,15 +124,10 @@ $pk_torrent = $dbh->lastInsertId();
 if (!isset($_SERVER['HTTP_USER_AGENT'])) {
     $_SERVER['HTTP_USER_AGENT'] = "N/A";
 }
-if (!isset($_GET['uploaded'])) {
-    $_GET['uploaded'] = 0;
-}
-if (!isset($_GET['downloaded'])) {
-    $_GET['downloaded'] = 0;
-}
-if (!isset($_GET['left'])) {
-    $_GET['left'] = 0;
-}
+
+$downloaded = isset($_GET['downloaded']) ? intval($_GET['downloaded']) : 0;
+$uploaded = isset($_GET['uploaded']) ? intval($_GET['uploaded']) : 0;
+$left = isset($_GET['left']) ? intval($_GET['left']) : 0;
 
 
 $count = $dbh->exec(
@@ -144,9 +139,9 @@ $count = $dbh->exec(
         . 'ON DUPLICATE KEY UPDATE `uploaded` = VALUES(`uploaded`), `downloaded` = VALUES(`downloaded`), `left` = VALUES(`left`), `last_updated` = VALUES(`last_updated`), '
         . '`id` = LAST_INSERT_ID(`peer_torrent`.`id`)',
         $pk_peer,
-        intval($_GET['uploaded']),
-        intval($_GET['downloaded']),
-        intval($_GET['left']),
+        $uploaded,
+        $downloaded,
+        $left,
         $dbh->quote(bin2hex($_GET['info_hash']))
     )
 );
@@ -161,8 +156,8 @@ $pk_peer_torrent = $dbh->lastInsertId();
 if (isset($_GET['event']) && $_GET['event'] === 'stopped') {
     $count = $dbh->exec(
         sprintf(
-            'UPDATE `peer_torrent` SET `stopped` = TRUE WHERE `id` = %s',
-            $dbh->quote($pk_peer_torrent, PDO::PARAM_INT)
+            'UPDATE `peer_torrent` SET `stopped` = TRUE WHERE `id` = %d',
+            $pk_peer_torrent
         )
     );
 
@@ -201,10 +196,10 @@ if ($results === false) {
     die(track($dbh->errorInfo()[2]));
 }
 
-$reply = array(); //To be encoded and sent to the client
+$reply = array(); // To be encoded and sent to the client
 
-while ($r = $results->fetch(PDO::FETCH_NUM)) { //Runs for every client with the same infohash
-    $reply[] = array($r[0], $r[1], $r[2]); //ip, port, peerid
+while ($r = $results->fetch(PDO::FETCH_NUM)) { // Runs for every client with the same infohash
+    $reply[] = array($r[0], $r[1], $r[2]); // ip, port, peerid
 }
 
 $results = $dbh->query(
@@ -226,8 +221,7 @@ if ($results === false) {
 $seeders = 0;
 $leechers = 0;
 
-if ($r = $results->fetch(PDO::FETCH_NUM))
-{
+if ($r = $results->fetch(PDO::FETCH_NUM)) {
     $seeders = $r[1];
     $leechers = $r[0];
 }
@@ -242,7 +236,7 @@ function track($list, $c=0, $i=0) {
         return 'd14:failure reason'.strlen($list).':'.$list.'e';
     }
     $p = ''; // Peer directory
-    foreach($list as $d) { // Runs for each client
+    foreach ($list as $d) { // Runs for each client
         $pid = '';
         if (!isset($_GET['no_peer_id'])) { // Send out peer_ids in the reply
             $real_id = hex2bin($d[2]);
