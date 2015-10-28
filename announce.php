@@ -52,7 +52,7 @@ header('X-Tracker-Version: Bitstorm '.__VERSION.' by stormhub.org with PDO githu
 try
 {
     $dbh = new PDO(
-        sprintf('mysql:dbname=%s;host=%s;port=%d', __DB_DATABASE, __DB_SERVER, __DB_PORT),
+        sprintf('mysql:dbname=bitstorm;host=%s;port=%d', __DB_SERVER, __DB_PORT),
         __DB_USERNAME,
         __DB_PASSWORD,
         array(
