@@ -1,0 +1,8 @@
+Options -MultiViews -Indexes
+
+Order allow,deny
+Deny from all
+
+<Files "announce.php">
+    Order deny,allow
+</Files>

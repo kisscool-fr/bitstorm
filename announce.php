@@ -52,11 +52,11 @@ header('X-Tracker-Version: Bitstorm '.__VERSION.' by stormhub.org with PDO githu
 try
 {
     $dbh = new PDO(
-        sprintf('mysql:dbname=bitstorm;host=%s;port=%d', __DB_SERVER, __DB_PORT),
+        sprintf('mysql:dbname=%s;host=%s;port=%d', __DB_NAME, __DB_SERVER, __DB_PORT),
         __DB_USERNAME,
         __DB_PASSWORD,
         array(
-            PDO::ATTR_PERSISTENT => true,
+            PDO::ATTR_PERSISTENT => __DB_PERSISTENT_CONNECTION,
             PDO::ATTR_CASE => PDO::CASE_NATURAL,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         )
@@ -122,7 +122,7 @@ $pk_torrent = $dbh->lastInsertId();
 
 // User agent is required
 if (!isset($_SERVER['HTTP_USER_AGENT'])) {
-    $_SERVER['HTTP_USER_AGENT'] = "N/A";
+    $_SERVER['HTTP_USER_AGENT'] = 'N/A';
 }
 
 $downloaded = isset($_GET['downloaded']) ? intval($_GET['downloaded']) : 0;
